@@ -46,9 +46,8 @@ class Friendship(models.Model):
     class StatusFriendship(models.TextChoices):
         NOT_REQUESTED = 'NR', _('Заявка не отправлена')
         PENDING = 'PE', _('Ожидается ответ')
-        ACCEPTED = 'AC', _('Заявка принята')
         REJECTED = 'RE', _('Заявка отклонена')
-        FRIENDS = 'FR', _('Друзья!')
+        ACCEPTED = 'AC', _('Заявка принята')
 
     status_friendship = models.CharField(
         max_length=2,
