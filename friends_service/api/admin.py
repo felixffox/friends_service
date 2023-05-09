@@ -14,11 +14,16 @@ class UserAdmin(admin.ModelAdmin):
 
 class FriendshipAdmin(admin.ModelAdmin):
     list_display = (
-        'friend',
-        'second_friend',
-        'status'
+        'initiator_friend',
+        'target_friend',
+        'status_friendship',
+        'friendship_date'
     )
-    search_fields = ('friend', 'second_friend')
+    search_fields = (
+        'initiator_friend',
+        'target_friend',
+        'status_friendship'
+    )
     save_on_top = True
 
 

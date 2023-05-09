@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class User(AbstractUser):
@@ -27,17 +28,34 @@ class User(AbstractUser):
 
 class Friendship(models.Model):
     """Модель отношений между юзерами - друзья"""
-    friend = models.ForeignKey(
+    initiator_friend = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='friend',
+        related_name='initiator_friend',
+        verbose_name='Отправитель заявки',
+        null=False
     )
-    second_friend = models.ForeignKey(
+    target_friend = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='second_friend'
+        related_name='target_friend',
+        verbose_name='Получатель заявки',
+        null=False
     )
-    status = models.CharField()
+    
+    class StatusFriendship(models.TextChoices):
+        NOT_REQUESTED = 'NR', _('Заявка не отправлена')
+        PENDING = 'PE', _('Ожидается ответ')
+        ACCEPTED = 'AC', _('Заявка принята')
+        REJECTED = 'RE', _('Заявка отклонена')
+        FRIENDS = 'FR', _('Друзья!')
+
+    status_friendship = models.CharField(
+        max_length=2,
+        choices=StatusFriendship.choices,
+        default=StatusFriendship.NOT_REQUESTED,
+        null=False
+    )
     friendship_date = models.DateTimeField(auto_now=True)
     
 
@@ -45,37 +63,10 @@ class Friendship(models.Model):
         verbose_name = 'Друг'
         verbose_name_plural = 'Друзья'
         constraints = [
-            models.UniqueConstraint(fields=['friend', 'second_friend'],
+            models.UniqueConstraint(fields=['initiator_friend', 'target_friend'],
                                     name='unique_friendship')
         ]
 
     def __str__(self) -> str:
-        return f'{self.friend.username} и \
-        {self.second_friend.username} друзья!'
-
-#class FriendRequest(models.Model):
-#    """Модель заявки на добавление в друзья"""
-#    send_user = models.ForeignKey(
-#        User,
-#        on_delete=models.CASCADE,
-#        related_name='send_user'
-#    )
-#    receive_user = models.ForeignKey(
-#        User,
-#        on_delete=models.CASCADE,
-#        related_name='receive_user'
-#    )
-#    request_date = models.DateTimeField(auto_now_add=True)
-#
-#    class Meta:
-#        verbose_name = 'Заявка'
-#        verbose_name_plural = 'Заявки'
-#        constraints = [
-#            models.UniqueConstraint(fields=['send_user', 'receive_user'],
-#                                    name='unique_request')
-#        ]
-#
-#    def __str__(self) -> str:
-#        return f'Заявка на добавление в друзья: \
-#        {self.send_user.username} -> {self.receive_user.username}'
-#    pass
+        return f'{self.initiator_friend.username} и \
+        {self.target_friend.username} - {self.status_friendship}'
