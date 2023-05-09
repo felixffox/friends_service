@@ -1,9 +1,9 @@
 from django.contrib import admin
 
-from .models import Friendship, User
+from .models import CustomUser, Friendship
 
 
-class UserAdmin(admin.ModelAdmin):
+class CustomUserAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'username'
@@ -27,5 +27,5 @@ class FriendshipAdmin(admin.ModelAdmin):
     save_on_top = True
 
 
-admin.site.register(User, UserAdmin)
+admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(Friendship, FriendshipAdmin)

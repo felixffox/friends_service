@@ -3,7 +3,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
-class User(AbstractUser):
+class CustomUser(AbstractUser):
     """Модель пользователя"""
     username = models.CharField(
         verbose_name='Юзернейм',
@@ -29,14 +29,14 @@ class User(AbstractUser):
 class Friendship(models.Model):
     """Модель отношений между юзерами - друзья"""
     initiator_friend = models.ForeignKey(
-        User,
+        CustomUser,
         on_delete=models.CASCADE,
         related_name='initiator_friend',
         verbose_name='Отправитель заявки',
         null=False
     )
     target_friend = models.ForeignKey(
-        User,
+        CustomUser,
         on_delete=models.CASCADE,
         related_name='target_friend',
         verbose_name='Получатель заявки',
