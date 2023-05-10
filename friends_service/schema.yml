@@ -1,0 +1,263 @@
+openapi: 3.0.3
+info:
+  title: ''
+  version: 0.0.0
+paths:
+  /friends/:
+    get:
+      operationId: friends_list
+      description: Список друзей
+      tags:
+      - friends
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomUser'
+          description: ''
+    post:
+      operationId: friends_create
+      description: Отправить заявку в друзья
+      tags:
+      - friends
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Friendship'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Friendship'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Friendship'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Friendship'
+          description: ''
+  /friends/{id}/:
+    get:
+      operationId: friends_retrieve
+      description: Посмотреть статус дружбы
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Друг.
+        required: true
+      tags:
+      - friends
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendshipStatus'
+          description: ''
+    delete:
+      operationId: friends_destroy
+      description: Удалить друга
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Друг.
+        required: true
+      tags:
+      - friends
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /friendship/:
+    get:
+      operationId: friendship_list
+      description: Список заявок
+      tags:
+      - friendship
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Friendship'
+          description: ''
+  /friendship/{id}/:
+    get:
+      operationId: friendship_retrieve
+      description: Принять заявку в друзья
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - friendship
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Friendship'
+          description: ''
+    delete:
+      operationId: friendship_destroy
+      description: Отклонить заявку в друзья
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - friendship
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /register/:
+    post:
+      operationId: register_create
+      tags:
+      - register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomUserRegister'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomUserRegister'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomUserRegister'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomUserRegister'
+          description: ''
+components:
+  schemas:
+    CustomUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          title: Юзернейм
+          description: Обязательно для заполнения
+          maxLength: 50
+      required:
+      - id
+      - username
+    CustomUserRegister:
+      type: object
+      properties:
+        username:
+          type: string
+          title: Юзернейм
+          description: Обязательно для заполнения
+          maxLength: 50
+        password:
+          type: string
+          writeOnly: true
+          title: Пароль
+          description: Обязательно для заполнения
+          maxLength: 150
+      required:
+      - password
+      - username
+    Friendship:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        target_friend:
+          type: integer
+          title: Получатель заявки
+        status_friendship:
+          allOf:
+          - $ref: '#/components/schemas/StatusFriendshipEnum'
+          readOnly: true
+        friendship_date:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - friendship_date
+      - id
+      - status_friendship
+      - target_friend
+    FriendshipStatus:
+      type: object
+      properties:
+        friendship_status:
+          type: string
+          readOnly: true
+      required:
+      - friendship_status
+    StatusFriendshipEnum:
+      enum:
+      - NR
+      - OU
+      - IN
+      - PE
+      - RE
+      - AC
+      type: string
+      description: |-
+        * `NR` - Заявка не отправлена
+        * `OU` - Исходящая заявка
+        * `IN` - Входящая заявка
+        * `PE` - Ожидается ответ
+        * `RE` - Заявка отклонена
+        * `AC` - Заявка принята
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid

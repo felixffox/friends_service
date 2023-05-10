@@ -21,6 +21,7 @@ class FriendsViewSet(mixins.ListModelMixin,
                      mixins.DestroyModelMixin,
                      mixins.RetrieveModelMixin,
                      viewsets.GenericViewSet):
+    queryset = Friendship.objects.all()
     serializer_classes = {'list': CustomUserSerializer,
                           'retrieve': FriendshipStatusSerializer,
                           'create': FriendshipSerializer}
@@ -30,16 +31,13 @@ class FriendsViewSet(mixins.ListModelMixin,
         """Список друзей"""
         return super(FriendsViewSet, self).list(request, *args, **kwargs)
 
-    #@swagger_auto_schema(responses={status.HTTP_200_OK: FriendshipSerializer(),
-    #                                status.HTTP_201_CREATED: FriendshipSerializer(),
-    #                                status.HTTP_208_ALREADY_REPORTED: FriendshipSerializer()})
     def create(self, request, *args, **kwargs):
         """Отправить заявку в друзья"""
         serializer = FriendshipSerializer(data=request.data)
         if serializer.is_valid():
             user = get_object_or_404(
                 CustomUser,
-                pk=request.data.get("target_friend", 0)
+                pk=request.data.get('target_friend')
             )
             if request.user != user:
                 response, stat = request.user.add_request_friendship(user)
@@ -70,7 +68,8 @@ class FriendsViewSet(mixins.ListModelMixin,
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def get_queryset(self):
-        return self.request.user.get_users_friends('is_friend')
+        is_friend = StatusFriendship.ACCEPTED
+        return self.request.user.get_users_friends(is_friend)
 
     def get_serializer_class(self, *args, **kwargs):
         return self.serializer_classes.get(self.action, None)
